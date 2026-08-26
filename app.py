@@ -308,6 +308,76 @@ Explain the reason in 2-4 sentences. Start with RETRY or COMPLETE.
         st.subheader("🧠 Reflection")
         st.info(reflection)
 
+        # 📊 AI Business Insights & Recommendations
+        st.subheader("📊 AI Business Insights")
+
+        insight_df = cleaned.copy()
+
+        st.write("### 🔎 Key Findings")
+
+        # Numeric insights
+        numeric_cols = insight_df.select_dtypes(include="number").columns.tolist()
+
+        if numeric_cols:
+            for col in numeric_cols[:4]:
+                if insight_df[col].notna().any():
+                    avg_value = insight_df[col].mean()
+                    max_value = insight_df[col].max()
+                    min_value = insight_df[col].min()
+
+                    st.write(
+                        f"• **{col}** — Average: `{avg_value:.2f}`, "
+                        f"Highest: `{max_value:.2f}`, "
+                        f"Lowest: `{min_value:.2f}`"
+                    )
+
+        # Categorical insights
+        categorical_cols = insight_df.select_dtypes(
+            include=["object", "category"]
+        ).columns.tolist()
+
+        if categorical_cols:
+            for col in categorical_cols[:4]:
+                counts = insight_df[col].value_counts(dropna=True)
+                if not counts.empty:
+                    top_value = counts.index[0]
+                    top_count = int(counts.iloc[0])
+
+                    st.write(
+                        f"• **{col}** — Most common: `{top_value}` "
+                        f"({top_count} records)"
+                    )
+
+        st.subheader("💡 AI Recommendations")
+
+        recommendations = []
+
+        if numeric_cols:
+            recommendations.append(
+                "Monitor the highest-value numeric metrics and identify "
+                "opportunities to improve them."
+            )
+
+        if categorical_cols:
+            recommendations.append(
+                "Focus marketing and inventory decisions on the most "
+                "frequently occurring customer/product categories."
+            )
+
+        if final_score < 0.80:
+            recommendations.append(
+                "The current validation score is below 80%. Consider collecting "
+                "more data, engineering better features, or tuning the models."
+            )
+        else:
+            recommendations.append(
+                "The current validation result is reasonably strong. "
+                "Continue monitoring performance with new business data."
+            )
+
+        for recommendation in recommendations:
+            st.info("💡 " + recommendation)
+
 else:
     st.info("👆 Upload a CSV file above to start the autonomous agent.")
 
